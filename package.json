@@ -1,0 +1,37 @@
+{
+  "name": "uniswaptoken",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edrygka/uniswapToken.git"
+  },
+  "keywords": [
+    "uniswap",
+    "erc20",
+    "token",
+    "ethereum"
+  ],
+  "author": "Eduard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/edrygka/uniswapToken/issues"
+  },
+  "homepage": "https://github.com/edrygka/uniswapToken#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.5.1",
+    "hardhat": "^2.6.7"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+  }
+}
