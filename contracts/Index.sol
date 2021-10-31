@@ -36,6 +36,11 @@ contract Index is Ownable, ERC20 {
         uniswapRouter = IUniswapV2Router02(_uniswapAddr);
     }
     
+    modifier notZero(uint32 amount) {
+        require(amount > 0, "Token value should be greater than 0");
+        _;
+    }
+    
     /**
      * @dev Approve all tokens to uniswap address
      */
@@ -53,20 +58,31 @@ contract Index is Ownable, ERC20 {
     }
     
     /**
-     * @dev Takes all tokens from sender and swaps them to index tokensA
+     * @dev Takes all tokens from sender and swaps them to index tokens
      */
-    function mintValue(uint32 amountA, uint32 amountB, uint32 amountC) public {
-        require(amountA > 0 && amountB > 0 && amountC > 0, "Token values should be greater than 0");
+    function mintValue(uint32 amountA, uint32 amountB, uint32 amountC) public
+        notZero(amountA) notZero(amountB) notZero(amountC) {
 
-        // TODO: prevent division vulnurability
-        swapToken(TokenA, amountA * koefA, getPair(addressA, address(this)), msg.sender);
-        swapToken(TokenB, amountB * koefB, getPair(addressB, address(this)), msg.sender);
-        swapToken(TokenC, amountC * koefC, getPair(addressC, address(this)), msg.sender);
+        // TODO: prevent division rounding
+        swapToken(TokenA, amountA * koefA / 100, getPair(addressA, address(this)), msg.sender);
+        swapToken(TokenB, amountB * koefB / 100, getPair(addressB, address(this)), msg.sender);
+        swapToken(TokenC, amountC * koefC / 100, getPair(addressC, address(this)), msg.sender);
     }
     
-    // TODO: mintSwapValue - charge Index token and receive A, B, C
+    /**
+     * @dev Swaps index tokens to token A, B and C
+     */
+    function mintSwapValue(uint32 indexAmount) public notZero(indexAmount) {
+        uint deadline = block.timestamp + trashold;
+        transferFrom(msg.sender, address(this), indexAmount);
+        uniswapRouter.swapExactTokensForTokens(indexAmount * 100 / koefA, 0, getPair(address(this), addressA), msg.sender, deadline);
+        uniswapRouter.swapExactTokensForTokens(indexAmount * 100 / koefB, 0, getPair(address(this), addressB), msg.sender, deadline);
+        uniswapRouter.swapExactTokensForTokens(indexAmount * 100 / koefC, 0, getPair(address(this), addressC), msg.sender, deadline);
+    }
     
-    
+    /**
+     * @dev Helper function which transfer tokens from caller and creates uniswap operation
+     */
     function swapToken(IERC20 Token, uint32 amount, address[] memory path, address to) private {
         Token.transferFrom(msg.sender, address(this), amount);
         uniswapRouter.swapExactTokensForTokens(amount, 0, path, to, block.timestamp + trashold);
@@ -82,6 +98,9 @@ contract Index is Ownable, ERC20 {
         return amountOutMins[path.length - 1];
     }
     
+    /**
+     * @dev Creates array with to addresses for uniswap methods
+     */
     function getPair(address adr1, address adr2) private pure returns (address[] memory) {
         address[] memory path = new address[](2);
         path[0] = adr1;
